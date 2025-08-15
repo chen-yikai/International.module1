@@ -5,6 +5,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class NavController : ViewModel() {
     private val initScreen = Screen.Home
@@ -12,7 +15,10 @@ class NavController : ViewModel() {
     var navStack = mutableStateListOf(initScreen)
 
     fun navTo(screen: Screen) {
-        currentNav = screen
+        viewModelScope.launch {
+//            delay(300)
+            currentNav = screen
+        }
         navStack.add(screen)
     }
 

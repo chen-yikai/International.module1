@@ -33,6 +33,7 @@ data class Room(
 
 data class MyBooking(
     val id: Long,
+    val hotelName: String,
     val firstName: String,
     val lastName: String,
     val checkIn: Long,

@@ -1,5 +1,6 @@
 package com.example.internationalmodule1.screens
 
+import android.icu.util.TimeUnit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +66,10 @@ import com.example.internationalmodule1.models.MyBooking
 import com.example.internationalmodule1.models.Screen
 import com.example.internationalmodule1.models.convertDate
 import com.example.internationalmodule1.models.paymentMethod
+import java.sql.Time
 import java.text.Normalizer.Form
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Composable
@@ -162,8 +166,8 @@ fun ConfirmScreen() {
             val lastName: String = "",
             val checkIn: String = "",
             val checkOut: String = "",
-            val adultsCount: String = "",
-            val childrenCount: String = "",
+            val adultsCount: String = "1",
+            val childrenCount: String = "0",
             val roomsCount: Int = 0,
             val isBusiness: Boolean = false,
             val paymentMethod: Int = 0,
@@ -236,9 +240,8 @@ fun ConfirmScreen() {
                         verticalArrangement = Arrangement.Center
                     ) {
                         LaunchedEffect(formData) {
-                            val totalGuest =
-                                (formData.adultsCount.toIntOrNull()
-                                    ?: 0) + (formData.childrenCount.toIntOrNull() ?: 0)
+                            val totalGuest = (formData.adultsCount.toIntOrNull()
+                                ?: 0) + (formData.childrenCount.toIntOrNull() ?: 0)
                             val totalRoom =
                                 totalGuest / room.roomTotalNumberOfGuests + if (totalGuest % room.roomTotalNumberOfGuests != 0) 1 else 0
                             formData = formData.copy(roomsCount = totalRoom)
@@ -278,8 +281,19 @@ fun ConfirmScreen() {
         }
 
         LaunchedEffect(formData) {
+            val day = java.util.concurrent.TimeUnit.DAYS.toMillis(1)
+            val checkIn = try {
+                convertDate(formData.checkIn)
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+            val checkOut = try {
+                convertDate(formData.checkOut)
+            } catch (e: Exception) {
+                System.currentTimeMillis() + day
+            }
             formData =
-                formData.copy(price = formData.roomsCount * room.roomPriceForOneNight + if (formData.isBusiness) 150 else 0)
+                formData.copy(price = formData.roomsCount * room.roomPriceForOneNight * ((checkOut - checkIn) / day).toInt() + if (formData.isBusiness) 150 else 0)
         }
 
         var showErrorDialog by remember { mutableStateOf(false) }
@@ -288,16 +302,14 @@ fun ConfirmScreen() {
         var willAdded by remember { mutableStateOf<MyBooking?>(null) }
 
         if (showErrorDialog) {
-            AlertDialog(
-                onDismissRequest = { showErrorDialog = false },
+            AlertDialog(onDismissRequest = { showErrorDialog = false },
                 title = { Text("Wrong format") },
                 text = { Text(errorHint) },
-                confirmButton = { showErrorDialog = false })
+                confirmButton = { Button(onClick = { showErrorDialog = false }) { Text("Ok") } })
         }
 
         if (showConfirmDialog) {
-            AlertDialog(
-                onDismissRequest = { showConfirmDialog = false },
+            AlertDialog(onDismissRequest = { showConfirmDialog = false },
                 title = { Text("Are you sure") },
                 text = { Text("Are you going to book this room?") },
                 confirmButton = {
@@ -333,12 +345,41 @@ fun ConfirmScreen() {
             FilledTonalButton(
                 onClick = {
                     try {
+                        val firstName = formData.firstName.trim()
+                        val lastName = formData.lastName.trim()
+                        val adults = formData.adultsCount.toInt()
+                        val children = formData.childrenCount.toInt()
+                        val checkIn = convertDate(formData.checkIn)
+                        val checkOut = convertDate(formData.checkOut)
+
+                        when {
+                            firstName.length !in (1..15) || lastName.length !in (1..15) -> throw Exception(
+                                "First name or Last name length must in 1~15"
+                            )
+
+                            !firstName.all { it in 'a'..'z' || it in 'A'..'Z' } || !lastName.all { it in 'a'..'z' || it in 'A'..'Z' } -> throw Exception(
+                                "First name or Last name must only contain letters"
+                            )
+
+                            adults == 0 && children != 0 -> throw Exception("Occupier can't be children only")
+
+                            adults !in (1..5) -> throw Exception("Number of adults must in 1~5")
+
+                            children !in listOf(
+                                0,
+                                adults * 1,
+                                adults * 2
+                            ) -> throw Exception("Number of children must be 0~2 times of adults")
+
+                            checkIn > checkOut -> throw Exception("CheckIn date must be earlier than CheckOut date")
+                        }
                         willAdded = MyBooking(
                             id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
+                            hotelName = detail.hotelName,
                             firstName = formData.firstName,
                             lastName = formData.lastName,
-                            checkIn = convertDate(formData.checkIn),
-                            checkOut = convertDate(formData.checkIn),
+                            checkIn = checkIn,
+                            checkOut = checkOut,
                             adultsCount = formData.adultsCount.toInt(),
                             childrenCount = formData.childrenCount.toInt(),
                             isBusiness = formData.isBusiness,

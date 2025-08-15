@@ -99,12 +99,7 @@ fun HomeScreen() {
                 if (it.hotelName.lowercase().contains(searchText.lowercase()))
                     Card(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        onClick = {
-                            if (it.hotelId in data.hasHotelDetails) {
-                                nav.navTo(Screen.BookingDetails)
-                                data.currentDetailsId = it.hotelId
-                            }
-                        }) {
+                    ) {
                         Row(
                             modifier = Modifier
                                 .padding(10.dp)
@@ -119,7 +114,10 @@ fun HomeScreen() {
                                     .size(100.dp)
                                     .clip(RoundedCornerShape(10.dp))
                             )
-                            Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier) {
+                            Column(
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                            ) {
                                 Text(it.hotelName, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(10.dp))
                                 Row(
@@ -155,7 +153,12 @@ fun HomeScreen() {
                                         )
                                     }
                                     OutlinedButton(
-                                        onClick = {},
+                                        onClick = {
+                                            if (it.hotelId in data.hasHotelDetails) {
+                                                nav.navTo(Screen.BookingDetails)
+                                                data.currentDetailsId = it.hotelId
+                                            }
+                                        },
                                         shape = RoundedCornerShape(10.dp)
                                     ) {
                                         Text("Book It")

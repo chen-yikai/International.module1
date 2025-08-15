@@ -28,7 +28,7 @@ fun convertDate(text: String): Long {
         } catch (_: Exception) {
         }
     }
-    throw Exception("Wrong date format")
+    throw Exception("Not a valid date format")
 }
 
 class DataModel(private val context: Application) : AndroidViewModel(context) {
