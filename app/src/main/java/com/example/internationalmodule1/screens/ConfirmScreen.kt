@@ -55,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.internationalmodule1.LocalDataModel
 import com.example.internationalmodule1.LocalNavController
+import com.example.internationalmodule1.TestTag
 import com.example.internationalmodule1.models.MyBooking
 import com.example.internationalmodule1.models.Screen
 import com.example.internationalmodule1.models.convertDate
@@ -79,7 +81,11 @@ fun ConfirmScreen() {
     val detail = data.hotelDetails[data.currentDetailsId]!!
     val room = detail.rooms.find { it.roomId == data.bookingRoomId }!!
 
-    Column(modifier = Modifier.statusBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .testTag(TestTag.Confirm.screen)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { nav.pop() }) {
                 Icon(
@@ -189,7 +195,12 @@ fun ConfirmScreen() {
             "Check-out date", formData.checkOut
         ) { formData = formData.copy(checkOut = it) })
 
-        LazyColumn(contentPadding = PaddingValues(10.dp), modifier = Modifier.weight(3f)) {
+        LazyColumn(
+            contentPadding = PaddingValues(10.dp),
+            modifier = Modifier
+                .weight(3f)
+                .testTag(TestTag.Confirm.form)
+        ) {
             item {
                 Text("Form", style = boldTitle)
             }
@@ -204,6 +215,7 @@ fun ConfirmScreen() {
                             hintText = it.first,
                             value = it.second,
                             onValueChange = it.third,
+                            tag = it.first,
                             modifier = Modifier
                                 .padding(horizontal = 5.dp)
                                 .padding(bottom = 5.dp)
@@ -223,6 +235,7 @@ fun ConfirmScreen() {
                         hintText = "Adults",
                         value = formData.adultsCount,
                         modifier = Modifier.weight(1f),
+                        tag = TestTag.Confirm.adults,
                         type = KeyboardType.Number
                     ) { formData = formData.copy(adultsCount = it) }
                     Spacer(Modifier.width(10.dp))
@@ -230,6 +243,7 @@ fun ConfirmScreen() {
                         hintText = "Children",
                         value = formData.childrenCount,
                         modifier = Modifier.weight(1f),
+                        tag = TestTag.Confirm.children,
                         type = KeyboardType.Number
                     ) { formData = formData.copy(childrenCount = it) }
                     Spacer(Modifier.width(10.dp))
@@ -257,12 +271,17 @@ fun ConfirmScreen() {
             item {
                 Text("Travel for business?")
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    FormRadio(selected = !formData.isBusiness, label = "For sightseeing") {
+                    FormRadio(
+                        selected = !formData.isBusiness,
+                        label = "For sightseeing",
+                        tag = TestTag.Confirm.sightseeing
+                    ) {
                         formData = formData.copy(isBusiness = false)
                     }
                     FormRadio(
                         selected = formData.isBusiness,
-                        label = "+ € 150\nFor business with a meeting room"
+                        label = "+ € 150\nFor business with a meeting room",
+                        tag = TestTag.Confirm.business
                     ) {
                         formData = formData.copy(isBusiness = true)
                     }
@@ -272,7 +291,9 @@ fun ConfirmScreen() {
                 Text("Which way to pay?")
                 Row {
                     paymentMethod.forEachIndexed { index, item ->
-                        FormRadio(selected = formData.paymentMethod == index, label = item) {
+                        FormRadio(
+                            selected = formData.paymentMethod == index, label = item, tag = item
+                        ) {
                             formData = formData.copy(paymentMethod = index)
                         }
                     }
@@ -302,21 +323,37 @@ fun ConfirmScreen() {
         var willAdded by remember { mutableStateOf<MyBooking?>(null) }
 
         if (showErrorDialog) {
-            AlertDialog(onDismissRequest = { showErrorDialog = false },
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
                 title = { Text("Wrong format") },
                 text = { Text(errorHint) },
-                confirmButton = { Button(onClick = { showErrorDialog = false }) { Text("Ok") } })
+                confirmButton = {
+                    Button(
+                        onClick = { showErrorDialog = false },
+                        modifier = Modifier.testTag(TestTag.Confirm.errorDialogYes)
+                    ) {
+                        Text(
+                            "Ok",
+                        )
+                    }
+                },
+                modifier = Modifier.testTag(TestTag.Confirm.errorDialog)
+            )
         }
 
         if (showConfirmDialog) {
             AlertDialog(onDismissRequest = { showConfirmDialog = false },
+                modifier = Modifier.testTag(TestTag.Confirm.confirmDialog),
                 title = { Text("Are you sure") },
                 text = { Text("Are you going to book this room?") },
                 confirmButton = {
-                    Button(onClick = {
-                        data.myBookings.add(willAdded!!)
-                        nav.navTo(Screen.MyBooking)
-                    }) { Text("Yes") }
+                    Button(
+                        onClick = {
+                            data.myBookings.add(willAdded!!)
+                            nav.navTo(Screen.MyBooking)
+                        },
+                        modifier = Modifier.testTag(TestTag.Confirm.confirmDialogYes)
+                    ) { Text("Yes") }
                 },
                 dismissButton = {
                     FilledTonalButton(onClick = { showConfirmDialog = false }) {
@@ -365,11 +402,7 @@ fun ConfirmScreen() {
 
                             adults !in (1..5) -> throw Exception("Number of adults must in 1~5")
 
-                            children !in listOf(
-                                0,
-                                adults * 1,
-                                adults * 2
-                            ) -> throw Exception("Number of children must be 0~2 times of adults")
+                            children !in 0..(adults * 2) -> throw Exception("Number of children must be 0~2 times of adults")
 
                             checkIn > checkOut -> throw Exception("CheckIn date must be earlier than CheckOut date")
                         }
@@ -395,6 +428,7 @@ fun ConfirmScreen() {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag(TestTag.Confirm.bookNowBtn)
                     .padding(horizontal = 10.dp)
                     .navigationBarsPadding(),
                 shape = RoundedCornerShape(10.dp)
@@ -406,13 +440,13 @@ fun ConfirmScreen() {
 }
 
 @Composable
-fun FormRadio(selected: Boolean, label: String, onClick: () -> Unit) {
+fun FormRadio(selected: Boolean, label: String, tag: String, onClick: () -> Unit) {
     Row(modifier = Modifier
         .clip(CircleShape)
         .clickable { onClick() }
         .padding(end = 10.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = selected, onClick = onClick)
+        RadioButton(selected = selected, onClick = onClick, modifier = Modifier.testTag(tag))
         Text(label, fontSize = 12.sp, lineHeight = 12.sp)
     }
 }
@@ -423,6 +457,7 @@ fun FormTextField(
     hintText: String,
     modifier: Modifier = Modifier,
     type: KeyboardType = KeyboardType.Text,
+    tag: String,
     onValueChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -430,7 +465,9 @@ fun FormTextField(
         onValueChange,
         singleLine = true,
         label = { Text(hintText) },
-        modifier = Modifier.then(modifier),
+        modifier = Modifier
+            .then(modifier)
+            .testTag(tag),
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = type)
     )
 }

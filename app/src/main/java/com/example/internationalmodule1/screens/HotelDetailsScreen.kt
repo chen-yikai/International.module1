@@ -71,7 +71,7 @@ fun HotelDetailsScreen() {
     Column(
         modifier = Modifier
             .statusBarsPadding()
-            .testTag(TestTag.Details.detailsScreen)
+            .testTag(TestTag.Details.screen)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { nav.pop() }) {
@@ -90,7 +90,7 @@ fun HotelDetailsScreen() {
                     selected = selectedIndex == index,
                     onClick = { selectedIndex = index },
                     text = { Text(item) },
-                    modifier = Modifier.testTag(if (index == 0) TestTag.Details.guestReviewsTabBtn else TestTag.Details.roomSelectionBtn)
+                    modifier = Modifier.testTag(if (index == 0) TestTag.Details.guestReviewsTabBtn else TestTag.Details.roomSelectionTabBtn)
                 )
             }
         }
@@ -123,7 +123,7 @@ val boldTitle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
 @Composable
 fun GuestReviews(detail: HotelDetails) {
-    LazyColumn {
+    LazyColumn(modifier = Modifier.testTag(TestTag.Details.guestReviewsTab)) {
         item {
             Column(
                 modifier = Modifier
@@ -207,7 +207,10 @@ fun AllRoom(detail: HotelDetails) {
     val data = LocalDataModel.current
     val nav = LocalNavController.current
 
-    LazyColumn(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 5.dp)) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 5.dp),
+        modifier = Modifier.testTag(TestTag.Details.roomSelectionTab)
+    ) {
         stickyHeader {
             Text(
                 "Rooms",

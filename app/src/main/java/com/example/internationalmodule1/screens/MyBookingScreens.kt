@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -24,12 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.internationalmodule1.LocalDataModel
 import com.example.internationalmodule1.LocalNavController
+import com.example.internationalmodule1.TestTag
 import com.example.internationalmodule1.models.Screen
 import com.example.internationalmodule1.models.paymentMethod
 import java.text.SimpleDateFormat
@@ -40,7 +41,9 @@ fun MyBookingsScreen() {
     val nav = LocalNavController.current
     val data = LocalDataModel.current
 
-    Column(modifier = Modifier.statusBarsPadding()) {
+    Column(modifier = Modifier
+        .statusBarsPadding()
+        .testTag(TestTag.MyBooking.screen)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { nav.navTo(Screen.Home) }) {
                 Icon(
