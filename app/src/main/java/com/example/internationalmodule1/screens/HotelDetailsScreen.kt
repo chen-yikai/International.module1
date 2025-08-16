@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.internationalmodule1.LocalDataModel
 import com.example.internationalmodule1.LocalNavController
+import com.example.internationalmodule1.TestTag
 import com.example.internationalmodule1.models.HotelDetails
 import com.example.internationalmodule1.models.Screen
 
@@ -66,7 +68,11 @@ fun HotelDetailsScreen() {
     val selectItems = listOf("Guest reviews", "Room selection")
     val detail = data.hotelDetails[data.currentDetailsId]!!
 
-    Column(modifier = Modifier.statusBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .testTag(TestTag.Details.detailsScreen)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { nav.pop() }) {
                 Icon(
@@ -80,9 +86,12 @@ fun HotelDetailsScreen() {
         HorizontalDivider()
         PrimaryTabRow(selectedTabIndex = selectedIndex) {
             selectItems.forEachIndexed { index, item ->
-                Tab(selected = selectedIndex == index,
+                Tab(
+                    selected = selectedIndex == index,
                     onClick = { selectedIndex = index },
-                    text = { Text(item) })
+                    text = { Text(item) },
+                    modifier = Modifier.testTag(if (index == 0) TestTag.Details.guestReviewsTabBtn else TestTag.Details.roomSelectionBtn)
+                )
             }
         }
         Box(
@@ -146,7 +155,10 @@ fun GuestReviews(detail: HotelDetails) {
             }
         }
         item {
-            LazyRow(contentPadding = PaddingValues(start = 10.dp)) {
+            LazyRow(
+                contentPadding = PaddingValues(start = 10.dp),
+                modifier = Modifier.testTag(TestTag.Details.reviewsList)
+            ) {
                 items(detail.guestReviews.reviewsObjects, key = { it.username }) {
                     Card(
                         modifier = Modifier

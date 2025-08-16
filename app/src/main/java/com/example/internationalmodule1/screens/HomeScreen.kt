@@ -1,15 +1,11 @@
 package com.example.internationalmodule1.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,11 +16,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,7 +28,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.example.internationalmodule1.LocalDataModel
 import com.example.internationalmodule1.LocalNavController
 import com.example.internationalmodule1.R
+import com.example.internationalmodule1.TestTag
 import com.example.internationalmodule1.models.Screen
 import kotlin.math.roundToInt
 
@@ -91,14 +86,17 @@ fun HomeScreen() {
             placeholder = { Text("Search a hotel name") },
             modifier = Modifier
                 .padding(10.dp)
-                .fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
+                .fillMaxWidth()
+                .testTag(TestTag.Home.searchBar),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {})
         )
-        LazyColumn {
+        LazyColumn(modifier = Modifier.testTag(TestTag.Home.hotelList)) {
             items(data.allHotel) {
                 if (it.hotelName.lowercase().contains(searchText.lowercase()))
                     Card(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
                     ) {
                         Row(
                             modifier = Modifier
@@ -159,7 +157,8 @@ fun HomeScreen() {
                                                 data.currentDetailsId = it.hotelId
                                             }
                                         },
-                                        shape = RoundedCornerShape(10.dp)
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.testTag(it.hotelName)
                                     ) {
                                         Text("Book It")
                                     }
@@ -169,7 +168,11 @@ fun HomeScreen() {
                     }
             }
             item {
-                Spacer(Modifier.navigationBarsPadding())
+                Spacer(
+                    Modifier
+                        .navigationBarsPadding()
+                        .testTag(TestTag.Home.hotelListBottom)
+                )
             }
         }
     }
