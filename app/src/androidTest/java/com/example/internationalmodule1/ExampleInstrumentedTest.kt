@@ -19,8 +19,8 @@ import org.junit.runner.RunWith
 
 const val delayTime = 10000L
 
-const val isTesting = false
-val currentTestingList = 19..100
+const val isTesting = true
+val currentTestingList = 9..100
 
 @RunWith(AndroidJUnit4::class)
 class startTesting {
@@ -31,6 +31,7 @@ class startTesting {
         val msg = "Step No $step, $info"
         Log.i("startTesting", msg)
         test()
+        rule.waitForIdle()
         if (step in currentTestingList || !isTesting) Thread.sleep(delayTime)
     }
 
