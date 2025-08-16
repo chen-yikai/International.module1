@@ -17,9 +17,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-const val delayTime = 4000L
+const val delayTime = 10000L
 
-const val isTesting = true
+const val isTesting = false
 val currentTestingList = 19..100
 
 @RunWith(AndroidJUnit4::class)
